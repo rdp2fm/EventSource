@@ -120,6 +120,7 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
 
     public func disconnect() {
         readyState = .closed
+	operationQueue.invalidate()
         task?.cancel()
         urlSession?.invalidateAndCancel()
     }
