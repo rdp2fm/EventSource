@@ -77,6 +77,7 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
     static let DefaultRetryTime = 3000
 
     public let url: URL
+    public var task: URLSessionDataTask
     private(set) public var lastEventId: String?
     private(set) public var retryTime = EventSource.DefaultRetryTime
     private(set) public var headers: [String: String]
@@ -91,6 +92,7 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
     private var operationQueue: OperationQueue
     private var mainQueue = DispatchQueue.main
     private var urlSession: URLSession?
+	
 
     public init(
         url: URL,
@@ -112,11 +114,13 @@ open class EventSource: NSObject, EventSourceProtocol, URLSessionDataDelegate {
 
         let configuration = sessionConfiguration(lastEventId: lastEventId)
         urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: operationQueue)
-        urlSession?.dataTask(with: url).resume()
+        task = urlSession?.dataTask(with: url)
+	task.resume()
     }
 
     public func disconnect() {
         readyState = .closed
+	task.cancel()
         urlSession?.invalidateAndCancel()
     }
 
